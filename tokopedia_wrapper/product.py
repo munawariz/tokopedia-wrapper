@@ -90,7 +90,9 @@ class Product(BaseWrapper):
                 'condition': self.__search_product_detail_content('Kondisi')['subtitle'] if self.__search_product_detail_content('Kondisi') else None,
                 'weight': self.__search_product_detail_content('Berat Satuan')['subtitle'] if self.__search_product_detail_content('Berat Satuan') else None,
                 'category': self.__search_product_detail_content('Kategori')['subtitle'] if self.__search_product_detail_content('Kategori') else None,
-                'images': [image['urlOriginal'] for image in self.product_media_component['data'][0]['media'] if image['type'] == 'image']
+                'images': [image['urlOriginal'] for image in self.product_media_component['data'][0]['media'] if image['type'] == 'image'],
+                'price': self.product_content_component['data'][0]['price']['value'],
+                'stock': self.product_content_component['data'][0]['stock']['value'],
             },
             'shop': {
                 'id': self.data['basicInfo']['shopID'],
