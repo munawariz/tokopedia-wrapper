@@ -3,7 +3,6 @@ from .query import PDPGetLayout
 from functools import cached_property
 from urllib.parse import urlparse
 import json
-import requests
 
 class Product(BaseWrapper):
     def __init__(self, link=None, shop_domain=None, product_key=None, **kwargs):
@@ -12,7 +11,6 @@ class Product(BaseWrapper):
         self.shop_domain = shop_domain
         self.product_key = product_key
         self.kwargs = kwargs
-        self.error = None
         self.endpoint = 'https://gql.tokopedia.com/graphql/PDPGetLayoutQuery'
 
     def __get_shop_domain(self):
@@ -43,13 +41,15 @@ class Product(BaseWrapper):
                 }
             }
         ]
-        response = requests.post(url=self.endpoint, json=payload, headers=self.headers)
-        
-        data = json.loads(response.text)
-        if 'errors' in data[0]:
-            self.error = data[0]['errors']
 
-        self.data = data[0]['data']['pdpGetLayout']
+        self.connection.request(method='POST', url=self.endpoint, body=json.dumps(payload), headers=self.headers)
+
+        with self.connection.getresponse() as response:
+            data = self.to_json(response)
+            self.status_code = response.getcode()
+            self.error = data[0]['errors'] if 'errors' in data[0] else None
+            self.data = data[0]['data']['pdpGetLayout']
+
         return self.data
 
     def __search_product_component(self, key, val):
